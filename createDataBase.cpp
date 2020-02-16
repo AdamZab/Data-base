@@ -1,60 +1,103 @@
+#include <time.h>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <cstdlib>
+#include <cstdio>
 
-using namespace std;
+#define NUMBEROFDATA 10
+#define MAXNUMBER 10000
 
-char menu(int option){
-    cout << endl << "Menu" << endl;
-    cout << "[1] Check file" << endl;
-    cout << "[2] Add random data to file" << endl;
-    cout << "[3] Erase data" << endl;
-    cout << "[4] End program" << endl;
-    cin >> option;
+class Data
+{
+    int ID;
+    char name[10];
+public:
+    void set_data()
+    {
+        ID = rand() %8999 + 1000;
+        int random_number;
+        for(int ii = 0; ii < 10; ++ii){
+            random_number = rand() % 26;
+            name[ii] = 'a' + random_number;
+        }
+
+    }
+    
+    void print_data(){
+        std::cout << ID << ": " << name << std::endl;
+    }
+    
+};
+
+int menu(int option){
+    std::cout << std::endl << "Menu" << std::endl;
+    std::cout << "[1] Read file" << std::endl;
+    std::cout << "[2] Add random data to file" << std::endl;
+    std::cout << "[3] Erase data" << std::endl;
+    std::cout << "[4] End program" << std::endl;
+    std::cin >> option;
     return option;
 }
     
-void openFile() {
-    int data;
-    ifstream dataBase;
-    dataBase.open("dataBase", ios::binary);
-    if(dataBase.fail())
+void open_file() {
+    std::ifstream data_base;
+    data_base.open("data_base.dat", std::ios::binary);
+    if(data_base.fail())
     {
-        cout << "File failed to open.\n";
+        std::cout << "File failed to open.\n";
         exit(1);
     }
-    cout << "dataBase contains:" << endl;
-    int lineNumber = 1;
-    while (dataBase.read((char*)&data, sizeof(data))){
-        cout << "[" << lineNumber << "]: " << data << endl;
-        ++lineNumber;
-    }
-    dataBase.close();
+    Data line;
+    std::cout << "data_base contains:" << std::endl;
+
+    while (data_base.read((char*)&line, sizeof(line)))
+        line.print_data();
+    data_base.close();    
 }
 
+void erase_file(){
+    std::ofstream data_base;
+    data_base.open("data_base.dat", std::ofstream::out | std::ofstream::trunc);
+    data_base.close();
+}
+
+void save_file(){
+    std::ofstream data_base;
+    data_base.open("data_base.dat", std::ios::binary | std::ios::app);
+    Data line;
+    line.set_data();
+    data_base.write((char*)&line, sizeof(line)); 
+
+    data_base.close();
+}
+
+
 int main(){
+    srand (time(NULL));
     while(1){
-        int option = 0;
-        option = menu(option);
-        if (option == 1){
-            openFile();
-        }
-        else if (option == 2){
-            int data;
-            ofstream dataBase;
-            dataBase.open("dataBase", ios::binary | ios::app);
-            for (int ii = 0; ii < 1000; ++ii){
-                data = rand();
-                dataBase.write((char*)&data, sizeof(data));
+        int option = menu(option);
+        switch (option){
+            
+            case 1:{
+            open_file();
+            break;
             }
-            dataBase.close();
-        }
-        else if (option == 3){
-            ofstream dataBase;
-            dataBase.open("dataBase", std::ofstream::out | std::ofstream::trunc);
-            dataBase.close();
-        }
-        else if (option == 4){
+
+            case 2:{
+                Data line;
+                for (int ii; ii <= 100; ++ii)
+                    save_file(); 
+                line.print_data();
+                break;
+            }
+        
+            case 3:{
+            erase_file();
+            break;
+            }
+        
+            case 4:
             return 0;
         }
     }
